@@ -99,7 +99,7 @@ repositories {
 
 ### 2. Add the dependency
 
-Use the GitHub user [`ataliton`](https://github.com/ataliton) and a release tag such as `1.0.0`.
+Use the GitHub user [`ataliton`](https://github.com/ataliton) and release tag `v1.0.1`.
 
 #### Spring Boot
 
@@ -109,14 +109,14 @@ Use the GitHub user [`ataliton`](https://github.com/ataliton) and a release tag 
 <dependency>
   <groupId>com.github.ataliton.apidogwatch</groupId>
   <artifactId>apidogwatch-spring</artifactId>
-  <version>1.0.0</version>
+  <version>v1.0.1</version>
 </dependency>
 ```
 
 **Gradle**
 
 ```kotlin
-implementation("com.github.ataliton.apidogwatch:apidogwatch-spring:1.0.0")
+implementation("com.github.ataliton.apidogwatch:apidogwatch-spring:v1.0.1")
 ```
 
 #### Java Servlet / Jakarta EE
@@ -127,14 +127,14 @@ implementation("com.github.ataliton.apidogwatch:apidogwatch-spring:1.0.0")
 <dependency>
   <groupId>com.github.ataliton.apidogwatch</groupId>
   <artifactId>apidogwatch-servlet</artifactId>
-  <version>1.0.0</version>
+  <version>v1.0.1</version>
 </dependency>
 ```
 
 **Gradle**
 
 ```kotlin
-implementation("com.github.ataliton.apidogwatch:apidogwatch-servlet:1.0.0")
+implementation("com.github.ataliton.apidogwatch:apidogwatch-servlet:v1.0.1")
 ```
 
 > Local development without JitPack:
