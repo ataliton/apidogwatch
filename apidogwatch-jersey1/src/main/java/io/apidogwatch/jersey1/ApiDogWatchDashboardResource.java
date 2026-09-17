@@ -5,6 +5,7 @@ import io.apidogwatch.api.DashboardAssets;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -29,16 +30,49 @@ public abstract class ApiDogWatchDashboardResource {
     @GET
     @Path("/ui")
     @Produces(MediaType.TEXT_HTML)
-    public Response ui() {
+    public Response ui(@QueryParam("lang") String lang,
+                       @HeaderParam("Accept-Language") String acceptLanguage) {
         if (!ApiDogWatchJersey.isEnabled()) {
             return Response.status(Response.Status.NOT_FOUND)
-                    .entity("ApiDogWatch is disabled. Start the JVM with -Dapidogwatch.enabled=true")
+                    .entity(disabledMessage(lang, acceptLanguage))
                     .type(MediaType.TEXT_PLAIN)
                     .build();
         }
-        return Response.ok(DashboardAssets.loadHtml())
+        String preferred = firstNonBlank(lang, resolveUserLanguage(), acceptLanguage);
+        return Response.ok(DashboardAssets.loadHtml(preferred))
                 .header("Cache-Control", "no-store")
                 .build();
+    }
+
+    /**
+     * Hook for hosts that know the signed-in user locale (e.g. Systêxtil {@code Login.idioma}).
+     * Default: {@code null} (browser / Accept-Language / {@code ?lang=} decide).
+     */
+    protected String resolveUserLanguage() {
+        return null;
+    }
+
+    private static String firstNonBlank(String... values) {
+        if (values == null) {
+            return null;
+        }
+        for (String value : values) {
+            if (value != null && !value.isBlank()) {
+                return value;
+            }
+        }
+        return null;
+    }
+
+    private static String disabledMessage(String lang, String acceptLanguage) {
+        String normalized = DashboardAssets.normalizeLang(firstNonBlank(lang, acceptLanguage));
+        if ("pt".equals(normalized)) {
+            return "ApiDogWatch desligado. Inicie a JVM com -Dapidogwatch.enabled=true";
+        }
+        if ("es".equals(normalized)) {
+            return "ApiDogWatch desactivado. Inicie la JVM con -Dapidogwatch.enabled=true";
+        }
+        return "ApiDogWatch is disabled. Start the JVM with -Dapidogwatch.enabled=true";
     }
 
     @GET

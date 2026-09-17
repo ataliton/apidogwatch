@@ -15,28 +15,13 @@
           },
           colors: {
             ink: {
-              50: '#f4f7f7',
-              100: '#e4ecec',
-              200: '#c9d7d7',
-              300: '#9fb6b6',
-              400: '#6f8f8f',
-              500: '#517373',
-              600: '#3f5b5b',
-              700: '#354b4b',
-              800: '#2e3f3f',
-              900: '#293636',
-              950: '#141c1c'
+              50: '#f4f7f7', 100: '#e4ecec', 200: '#c9d7d7', 300: '#9fb6b6',
+              400: '#6f8f8f', 500: '#517373', 600: '#3f5b5b', 700: '#354b4b',
+              800: '#2e3f3f', 900: '#293636', 950: '#141c1c'
             },
-            signal: {
-              DEFAULT: '#0f9f6e',
-              soft: '#d9f5ea',
-              warn: '#d97706',
-              danger: '#e11d48'
-            }
+            signal: { DEFAULT: '#0f9f6e', soft: '#d9f5ea', warn: '#d97706', danger: '#e11d48' }
           },
-          boxShadow: {
-            panel: '0 24px 60px -28px rgba(20, 28, 28, 0.45)'
-          }
+          boxShadow: { panel: '0 24px 60px -28px rgba(20, 28, 28, 0.45)' }
         }
       }
     }
@@ -52,35 +37,18 @@
         radial-gradient(900px 500px at 100% 0%, rgba(41, 54, 54, 0.08), transparent 50%),
         linear-gradient(180deg, #f7faf9 0%, #eef3f2 100%);
     }
-    .drawer {
-      transform: translateX(100%);
-      transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
-    }
+    .drawer { transform: translateX(100%); transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1); }
     .drawer.open { transform: translateX(0); }
-    .backdrop {
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 220ms ease;
-    }
-    .backdrop.open {
-      opacity: 1;
-      pointer-events: auto;
-    }
+    .backdrop { opacity: 0; pointer-events: none; transition: opacity 220ms ease; }
+    .backdrop.open { opacity: 1; pointer-events: auto; }
     .mono-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
-    .mono-scroll::-webkit-scrollbar-thumb {
-      background: #9fb6b6;
-      border-radius: 999px;
-    }
-    .pulse-dot {
-      animation: pulse 1.8s ease-in-out infinite;
-    }
+    .mono-scroll::-webkit-scrollbar-thumb { background: #9fb6b6; border-radius: 999px; }
+    .pulse-dot { animation: pulse 1.8s ease-in-out infinite; }
     @keyframes pulse {
       0%, 100% { opacity: 1; transform: scale(1); }
       50% { opacity: 0.45; transform: scale(0.85); }
     }
-    .fade-in {
-      animation: fadeIn 320ms ease both;
-    }
+    .fade-in { animation: fadeIn 320ms ease both; }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(6px); }
       to { opacity: 1; transform: translateY(0); }
@@ -88,6 +56,7 @@
   </style>
 </head>
 <body class="font-sans text-ink-900 antialiased">
+  <script>window.__APIDOGWATCH_LANG__ = "__APIDOGWATCH_LANG__";</script>
   <div class="min-h-full">
     <header class="border-b border-ink-200/80 bg-white/70 backdrop-blur-md sticky top-0 z-20">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
@@ -103,19 +72,20 @@
               <h1 class="text-lg font-semibold tracking-tight">ApiDogWatch</h1>
               <span class="inline-flex items-center gap-1 rounded-full bg-signal-soft px-2 py-0.5 text-[11px] font-medium text-signal">
                 <span class="h-1.5 w-1.5 rounded-full bg-signal pulse-dot"></span>
-                live
+                <span data-i18n="live">ao vivo</span>
               </span>
             </div>
-            <p class="text-xs text-ink-500">Runtime contract guard for OpenAPI / Swagger</p>
+            <p class="text-xs text-ink-500" data-i18n="tagline">Guardião de contrato OpenAPI / Swagger em runtime</p>
           </div>
         </div>
         <div class="flex items-center gap-2">
-          <button id="refreshBtn" class="rounded-lg border border-ink-200 bg-white px-3 py-2 text-sm font-medium text-ink-700 hover:bg-ink-50 transition">
-            Refresh
-          </button>
-          <button id="clearBtn" class="rounded-lg bg-ink-950 px-3 py-2 text-sm font-medium text-white hover:bg-ink-800 transition">
-            Clear history
-          </button>
+          <select id="langSelect" class="rounded-lg border border-ink-200 bg-white px-2 py-2 text-sm" title="Language" aria-label="Language">
+            <option value="pt">PT</option>
+            <option value="en">EN</option>
+            <option value="es">ES</option>
+          </select>
+          <button id="refreshBtn" class="rounded-lg border border-ink-200 bg-white px-3 py-2 text-sm font-medium text-ink-700 hover:bg-ink-50 transition" data-i18n="refresh">Atualizar</button>
+          <button id="clearBtn" class="rounded-lg bg-ink-950 px-3 py-2 text-sm font-medium text-white hover:bg-ink-800 transition" data-i18n="clear">Limpar histórico</button>
         </div>
       </div>
     </header>
@@ -123,56 +93,48 @@
     <main class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 fade-in">
         <article class="rounded-2xl border border-ink-200 bg-white p-5 shadow-sm">
-          <p class="text-xs uppercase tracking-[0.14em] text-ink-400">Requests</p>
+          <p class="text-xs uppercase tracking-[0.14em] text-ink-400" data-i18n="metric.requests">Requisições</p>
           <p id="metricTotal" class="mt-3 text-3xl font-semibold tabular-nums">0</p>
-          <p class="mt-1 text-sm text-ink-500">Captured in memory</p>
+          <p class="mt-1 text-sm text-ink-500" data-i18n="metric.requestsHint">Capturadas em memória</p>
         </article>
         <article class="rounded-2xl border border-ink-200 bg-white p-5 shadow-sm">
-          <p class="text-xs uppercase tracking-[0.14em] text-ink-400">Alerts</p>
+          <p class="text-xs uppercase tracking-[0.14em] text-ink-400" data-i18n="metric.alerts">Alertas</p>
           <p id="metricAlerts" class="mt-3 text-3xl font-semibold tabular-nums text-signal-danger">0</p>
-          <p class="mt-1 text-sm text-ink-500">Contract divergences</p>
+          <p class="mt-1 text-sm text-ink-500" data-i18n="metric.alertsHint">Divergências de contrato</p>
         </article>
         <article class="rounded-2xl border border-ink-200 bg-white p-5 shadow-sm">
-          <p class="text-xs uppercase tracking-[0.14em] text-ink-400">Clean</p>
+          <p class="text-xs uppercase tracking-[0.14em] text-ink-400" data-i18n="metric.clean">Limpos</p>
           <p id="metricClean" class="mt-3 text-3xl font-semibold tabular-nums text-signal">0</p>
-          <p class="mt-1 text-sm text-ink-500">Matched without issues</p>
+          <p class="mt-1 text-sm text-ink-500" data-i18n="metric.cleanHint">Sem problemas no contrato</p>
         </article>
         <article class="rounded-2xl border border-ink-200 bg-white p-5 shadow-sm">
-          <p class="text-xs uppercase tracking-[0.14em] text-ink-400">Undocumented</p>
+          <p class="text-xs uppercase tracking-[0.14em] text-ink-400" data-i18n="metric.undoc">Não documentadas</p>
           <p id="metricUndoc" class="mt-3 text-3xl font-semibold tabular-nums text-signal-warn">0</p>
-          <p class="mt-1 text-sm text-ink-500">Routes missing in OpenAPI</p>
+          <p class="mt-1 text-sm text-ink-500" data-i18n="metric.undocHint">Rotas ausentes no OpenAPI</p>
         </article>
       </section>
 
       <section class="rounded-2xl border border-ink-200 bg-white shadow-sm overflow-hidden fade-in">
         <div class="border-b border-ink-100 px-5 py-4 flex flex-col lg:flex-row lg:items-center gap-3 justify-between">
           <div>
-            <h2 class="text-base font-semibold">Inspected traffic</h2>
-            <p class="text-sm text-ink-500">Filter by method, path or alert status</p>
+            <h2 class="text-base font-semibold" data-i18n="traffic.title">Tráfego inspecionado</h2>
+            <p class="text-sm text-ink-500" data-i18n="traffic.subtitle">Filtre por método, rota ou status de alerta</p>
           </div>
           <div class="flex flex-wrap items-center gap-2">
             <select id="filterMethod" class="rounded-lg border border-ink-200 bg-white px-3 py-2 text-sm">
-              <option value="">All methods</option>
-              <option>GET</option>
-              <option>POST</option>
-              <option>PUT</option>
-              <option>PATCH</option>
-              <option>DELETE</option>
+              <option value="" data-i18n="filter.allMethods">Todos os métodos</option>
+              <option>GET</option><option>POST</option><option>PUT</option><option>PATCH</option><option>DELETE</option>
             </select>
-            <input id="filterPath" type="search" placeholder="Filter path…"
+            <input id="filterPath" type="search" data-i18n-placeholder="filter.pathPlaceholder"
                    class="rounded-lg border border-ink-200 px-3 py-2 text-sm w-44 sm:w-56 focus:outline-none focus:ring-2 focus:ring-signal/30" />
             <select id="filterStatus" class="rounded-lg border border-ink-200 bg-white px-3 py-2 text-sm">
-              <option value="">All status</option>
-              <option value="200">200</option>
-              <option value="201">201</option>
-              <option value="400">400</option>
-              <option value="401">401</option>
-              <option value="404">404</option>
-              <option value="500">500</option>
+              <option value="" data-i18n="filter.allStatus">Todos os status</option>
+              <option value="200">200</option><option value="201">201</option><option value="400">400</option>
+              <option value="401">401</option><option value="404">404</option><option value="500">500</option>
             </select>
             <label class="inline-flex items-center gap-2 rounded-lg border border-ink-200 px-3 py-2 text-sm cursor-pointer select-none">
               <input id="filterAlerts" type="checkbox" class="rounded border-ink-300 text-signal focus:ring-signal" />
-              Alerts only
+              <span data-i18n="filter.alertsOnly">Só alertas</span>
             </label>
           </div>
         </div>
@@ -181,19 +143,19 @@
           <table class="min-w-full text-sm">
             <thead class="bg-ink-50/80 text-left text-ink-500">
               <tr>
-                <th class="px-5 py-3 font-medium">Time</th>
-                <th class="px-5 py-3 font-medium">Method</th>
-                <th class="px-5 py-3 font-medium">Route</th>
-                <th class="px-5 py-3 font-medium">Status</th>
-                <th class="px-5 py-3 font-medium">Latency</th>
-                <th class="px-5 py-3 font-medium">Alerts</th>
+                <th class="px-5 py-3 font-medium" data-i18n="table.time">Hora</th>
+                <th class="px-5 py-3 font-medium" data-i18n="table.method">Método</th>
+                <th class="px-5 py-3 font-medium" data-i18n="table.route">Rota</th>
+                <th class="px-5 py-3 font-medium" data-i18n="table.status">Status</th>
+                <th class="px-5 py-3 font-medium" data-i18n="table.latency">Latência</th>
+                <th class="px-5 py-3 font-medium" data-i18n="table.alerts">Alertas</th>
               </tr>
             </thead>
             <tbody id="requestsBody" class="divide-y divide-ink-100"></tbody>
           </table>
           <div id="emptyState" class="hidden px-5 py-16 text-center">
-            <p class="text-ink-900 font-medium">No traffic inspected yet</p>
-            <p class="mt-1 text-sm text-ink-500">Call your API endpoints and refresh — ApiDogWatch will compare live payloads to the contract.</p>
+            <p class="text-ink-900 font-medium" data-i18n="empty.title">Nenhum tráfego inspecionado ainda</p>
+            <p class="mt-1 text-sm text-ink-500" data-i18n="empty.subtitle">Chame endpoints da API e atualize — o ApiDogWatch compara o payload real com o contrato.</p>
           </div>
         </div>
       </section>
@@ -204,26 +166,205 @@
   <aside id="drawer" class="drawer fixed inset-y-0 right-0 z-40 w-full max-w-3xl bg-white shadow-panel border-l border-ink-200 flex flex-col">
     <div class="px-5 py-4 border-b border-ink-100 flex items-start justify-between gap-3">
       <div>
-        <p class="text-xs uppercase tracking-[0.14em] text-ink-400">Inspection detail</p>
+        <p class="text-xs uppercase tracking-[0.14em] text-ink-400" data-i18n="drawer.eyebrow">Detalhe da inspeção</p>
         <h3 id="drawerTitle" class="mt-1 text-lg font-semibold">—</h3>
         <p id="drawerMeta" class="mt-1 text-sm text-ink-500"></p>
       </div>
-      <button id="closeDrawer" class="rounded-lg border border-ink-200 px-3 py-2 text-sm hover:bg-ink-50">Close</button>
+      <button id="closeDrawer" class="rounded-lg border border-ink-200 px-3 py-2 text-sm hover:bg-ink-50" data-i18n="drawer.close">Fechar</button>
     </div>
     <div id="divergenceList" class="px-5 py-4 border-b border-ink-100 space-y-2 max-h-40 overflow-y-auto mono-scroll"></div>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-0 flex-1 min-h-0">
       <div class="border-b lg:border-b-0 lg:border-r border-ink-100 flex flex-col min-h-0">
-        <div class="px-5 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-ink-400">Real payload</div>
+        <div class="px-5 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-ink-400" data-i18n="drawer.real">Payload real</div>
         <pre id="realPayload" class="mono-scroll flex-1 overflow-auto px-5 pb-5 text-[12px] leading-5 font-mono text-ink-800 whitespace-pre-wrap"></pre>
       </div>
       <div class="flex flex-col min-h-0">
-        <div class="px-5 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-ink-400">Swagger / OpenAPI schema</div>
+        <div class="px-5 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-ink-400" data-i18n="drawer.schema">Schema Swagger / OpenAPI</div>
         <pre id="expectedSchema" class="mono-scroll flex-1 overflow-auto px-5 pb-5 text-[12px] leading-5 font-mono text-ink-800 whitespace-pre-wrap"></pre>
       </div>
     </div>
   </aside>
 
   <script>
+    const I18N = {
+      pt: {
+        live: 'ao vivo',
+        tagline: 'Guardião de contrato OpenAPI / Swagger em runtime',
+        refresh: 'Atualizar',
+        clear: 'Limpar histórico',
+        'metric.requests': 'Requisições',
+        'metric.requestsHint': 'Capturadas em memória',
+        'metric.alerts': 'Alertas',
+        'metric.alertsHint': 'Divergências de contrato',
+        'metric.clean': 'Limpos',
+        'metric.cleanHint': 'Sem problemas no contrato',
+        'metric.undoc': 'Não documentadas',
+        'metric.undocHint': 'Rotas ausentes no OpenAPI',
+        'traffic.title': 'Tráfego inspecionado',
+        'traffic.subtitle': 'Filtre por método, rota ou status de alerta',
+        'filter.allMethods': 'Todos os métodos',
+        'filter.pathPlaceholder': 'Filtrar rota…',
+        'filter.allStatus': 'Todos os status',
+        'filter.alertsOnly': 'Só alertas',
+        'table.time': 'Hora',
+        'table.method': 'Método',
+        'table.route': 'Rota',
+        'table.status': 'Status',
+        'table.latency': 'Latência',
+        'table.alerts': 'Alertas',
+        'empty.title': 'Nenhum tráfego inspecionado ainda',
+        'empty.subtitle': 'Chame endpoints da API e atualize — o ApiDogWatch compara o payload real com o contrato.',
+        'drawer.eyebrow': 'Detalhe da inspeção',
+        'drawer.close': 'Fechar',
+        'drawer.real': 'Payload real',
+        'drawer.schema': 'Schema Swagger / OpenAPI',
+        'row.alerts': '{n} alerta(s)',
+        'row.clean': 'limpo',
+        'drawer.meta': 'Status {status} · {ms} ms · {time}',
+        'drawer.noDiv': 'Sem divergências — o payload está alinhado ao contrato.',
+        'drawer.noSchema': 'Nenhum schema resolvido para esta resposta.',
+        'div.EXTRA_FIELD': 'Campo extra',
+        'div.MISSING_FIELD': 'Campo ausente',
+        'div.TYPE_MISMATCH': 'Tipo divergente',
+        'div.UNDOCUMENTED_ROUTE': 'Rota não documentada',
+        'div.UNEXPECTED_STATUS': 'Status inesperado',
+        'div.INVALID_JSON': 'JSON inválido'
+      },
+      en: {
+        live: 'live',
+        tagline: 'Runtime contract guard for OpenAPI / Swagger',
+        refresh: 'Refresh',
+        clear: 'Clear history',
+        'metric.requests': 'Requests',
+        'metric.requestsHint': 'Captured in memory',
+        'metric.alerts': 'Alerts',
+        'metric.alertsHint': 'Contract divergences',
+        'metric.clean': 'Clean',
+        'metric.cleanHint': 'Matched without issues',
+        'metric.undoc': 'Undocumented',
+        'metric.undocHint': 'Routes missing in OpenAPI',
+        'traffic.title': 'Inspected traffic',
+        'traffic.subtitle': 'Filter by method, path or alert status',
+        'filter.allMethods': 'All methods',
+        'filter.pathPlaceholder': 'Filter path…',
+        'filter.allStatus': 'All status',
+        'filter.alertsOnly': 'Alerts only',
+        'table.time': 'Time',
+        'table.method': 'Method',
+        'table.route': 'Route',
+        'table.status': 'Status',
+        'table.latency': 'Latency',
+        'table.alerts': 'Alerts',
+        'empty.title': 'No traffic inspected yet',
+        'empty.subtitle': 'Call your API endpoints and refresh — ApiDogWatch will compare live payloads to the contract.',
+        'drawer.eyebrow': 'Inspection detail',
+        'drawer.close': 'Close',
+        'drawer.real': 'Real payload',
+        'drawer.schema': 'Swagger / OpenAPI schema',
+        'row.alerts': '{n} alert(s)',
+        'row.clean': 'clean',
+        'drawer.meta': 'Status {status} · {ms} ms · {time}',
+        'drawer.noDiv': 'No divergences — payload matches the contract.',
+        'drawer.noSchema': 'No schema resolved for this response.',
+        'div.EXTRA_FIELD': 'Extra field',
+        'div.MISSING_FIELD': 'Missing field',
+        'div.TYPE_MISMATCH': 'Type mismatch',
+        'div.UNDOCUMENTED_ROUTE': 'Undocumented route',
+        'div.UNEXPECTED_STATUS': 'Unexpected status',
+        'div.INVALID_JSON': 'Invalid JSON'
+      },
+      es: {
+        live: 'en vivo',
+        tagline: 'Guardián de contrato OpenAPI / Swagger en runtime',
+        refresh: 'Actualizar',
+        clear: 'Limpiar historial',
+        'metric.requests': 'Solicitudes',
+        'metric.requestsHint': 'Capturadas en memoria',
+        'metric.alerts': 'Alertas',
+        'metric.alertsHint': 'Divergencias de contrato',
+        'metric.clean': 'Limpios',
+        'metric.cleanHint': 'Sin problemas en el contrato',
+        'metric.undoc': 'No documentadas',
+        'metric.undocHint': 'Rutas ausentes en OpenAPI',
+        'traffic.title': 'Tráfico inspeccionado',
+        'traffic.subtitle': 'Filtre por método, ruta o estado de alerta',
+        'filter.allMethods': 'Todos los métodos',
+        'filter.pathPlaceholder': 'Filtrar ruta…',
+        'filter.allStatus': 'Todos los estados',
+        'filter.alertsOnly': 'Solo alertas',
+        'table.time': 'Hora',
+        'table.method': 'Método',
+        'table.route': 'Ruta',
+        'table.status': 'Estado',
+        'table.latency': 'Latencia',
+        'table.alerts': 'Alertas',
+        'empty.title': 'Aún no hay tráfico inspeccionado',
+        'empty.subtitle': 'Llame endpoints de la API y actualice — ApiDogWatch compara el payload real con el contrato.',
+        'drawer.eyebrow': 'Detalle de inspección',
+        'drawer.close': 'Cerrar',
+        'drawer.real': 'Payload real',
+        'drawer.schema': 'Schema Swagger / OpenAPI',
+        'row.alerts': '{n} alerta(s)',
+        'row.clean': 'limpio',
+        'drawer.meta': 'Estado {status} · {ms} ms · {time}',
+        'drawer.noDiv': 'Sin divergencias — el payload coincide con el contrato.',
+        'drawer.noSchema': 'No se resolvió un schema para esta respuesta.',
+        'div.EXTRA_FIELD': 'Campo extra',
+        'div.MISSING_FIELD': 'Campo ausente',
+        'div.TYPE_MISMATCH': 'Tipo divergente',
+        'div.UNDOCUMENTED_ROUTE': 'Ruta no documentada',
+        'div.UNEXPECTED_STATUS': 'Estado inesperado',
+        'div.INVALID_JSON': 'JSON inválido'
+      }
+    };
+
+    function normalizeLang(raw) {
+      if (!raw || raw === '__APIDOGWATCH_LANG__') return null;
+      const v = String(raw).trim().toLowerCase().replace('_', '-');
+      if (v.startsWith('pt')) return 'pt';
+      if (v.startsWith('es')) return 'es';
+      if (v.startsWith('en')) return 'en';
+      return null;
+    }
+
+    function detectLang() {
+      const params = new URLSearchParams(window.location.search);
+      const fromQuery = normalizeLang(params.get('lang'));
+      if (fromQuery) return fromQuery;
+      const fromServer = normalizeLang(window.__APIDOGWATCH_LANG__);
+      if (fromServer) return fromServer;
+      const stored = normalizeLang(localStorage.getItem('apidogwatch.lang'));
+      if (stored) return stored;
+      const nav = normalizeLang(navigator.language || (navigator.languages && navigator.languages[0]));
+      return nav || 'en';
+    }
+
+    let LANG = detectLang();
+
+    function t(key, vars) {
+      const dict = I18N[LANG] || I18N.en;
+      let value = dict[key] || I18N.en[key] || key;
+      if (vars) {
+        Object.keys(vars).forEach(k => {
+          value = value.replaceAll('{' + k + '}', String(vars[k]));
+        });
+      }
+      return value;
+    }
+
+    function applyI18n() {
+      document.documentElement.lang = LANG === 'pt' ? 'pt-BR' : LANG;
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        el.textContent = t(el.getAttribute('data-i18n'));
+      });
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        el.setAttribute('placeholder', t(el.getAttribute('data-i18n-placeholder')));
+      });
+      const sel = document.getElementById('langSelect');
+      if (sel) sel.value = LANG;
+      document.title = 'ApiDogWatch';
+    }
+
     const API_BASE = (() => {
       const path = window.location.pathname.replace(/\/+$/, '');
       if (path.endsWith('/ui')) return path.slice(0, -3) || '/apidogwatch';
@@ -270,7 +411,8 @@
 
     function formatTime(iso) {
       try {
-        return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const locale = LANG === 'pt' ? 'pt-BR' : LANG === 'es' ? 'es' : 'en';
+        return new Date(iso).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
       } catch {
         return iso;
       }
@@ -305,6 +447,12 @@
       for (const item of items) {
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-ink-50/70 cursor-pointer transition';
+        const alertLabel = item.hasAlerts
+          ? t('row.alerts', { n: item.alertCount })
+          : t('row.clean');
+        const alertClass = item.hasAlerts
+          ? 'bg-rose-50 text-rose-700'
+          : 'bg-emerald-50 text-emerald-700';
         tr.innerHTML = `
           <td class="px-5 py-3 text-ink-500 whitespace-nowrap">${formatTime(item.timestamp)}</td>
           <td class="px-5 py-3">${methodBadge(item.method)}</td>
@@ -312,9 +460,7 @@
           <td class="px-5 py-3 font-medium ${statusTone(item.statusCode)}">${item.statusCode}</td>
           <td class="px-5 py-3 text-ink-500">${item.durationMs} ms</td>
           <td class="px-5 py-3">
-            ${item.hasAlerts
-              ? `<span class="inline-flex rounded-full bg-rose-50 text-rose-700 px-2 py-0.5 text-xs font-medium">${item.alertCount} alert(s)</span>`
-              : `<span class="inline-flex rounded-full bg-emerald-50 text-emerald-700 px-2 py-0.5 text-xs font-medium">clean</span>`}
+            <span class="inline-flex rounded-full ${alertClass} px-2 py-0.5 text-xs font-medium">${alertLabel}</span>
           </td>`;
         tr.addEventListener('click', () => openDetail(item.id));
         els.requestsBody.appendChild(tr);
@@ -329,25 +475,33 @@
         .replaceAll('"', '&quot;');
     }
 
+    function divergenceLabel(type) {
+      return t('div.' + type) || type;
+    }
+
     async function openDetail(id) {
       const data = await fetchJson(`${API_BASE}/api/requests/${id}`);
       els.drawerTitle.textContent = `${data.method} ${data.path}`;
-      els.drawerMeta.textContent = `Status ${data.statusCode} · ${data.durationMs} ms · ${formatTime(data.timestamp)}`;
+      els.drawerMeta.textContent = t('drawer.meta', {
+        status: data.statusCode,
+        ms: data.durationMs,
+        time: formatTime(data.timestamp)
+      });
 
       const divergences = data.divergences || [];
       if (!divergences.length) {
-        els.divergenceList.innerHTML = `<div class="rounded-xl bg-emerald-50 text-emerald-800 px-3 py-2 text-sm">No divergences — payload matches the contract.</div>`;
+        els.divergenceList.innerHTML = `<div class="rounded-xl bg-emerald-50 text-emerald-800 px-3 py-2 text-sm">${t('drawer.noDiv')}</div>`;
       } else {
         els.divergenceList.innerHTML = divergences.map(d => `
           <div class="rounded-xl border border-rose-200 bg-rose-50/70 px-3 py-2">
-            <div class="text-xs font-semibold text-rose-700">${escapeHtml(d.type)}</div>
+            <div class="text-xs font-semibold text-rose-700">${escapeHtml(divergenceLabel(d.type))}</div>
             <div class="text-sm text-ink-800 mt-0.5">${escapeHtml(d.message)}</div>
             <div class="text-xs font-mono text-ink-500 mt-1">${escapeHtml(d.path || '$')}</div>
           </div>`).join('');
       }
 
       els.realPayload.textContent = data.responseBody || '—';
-      els.expectedSchema.textContent = data.expectedSchemaJson || 'No schema resolved for this response.';
+      els.expectedSchema.textContent = data.expectedSchemaJson || t('drawer.noSchema');
       els.drawer.classList.add('open');
       els.backdrop.classList.add('open');
     }
@@ -360,6 +514,16 @@
     async function refreshAll() {
       await Promise.all([loadMetrics(), loadRequests()]);
     }
+
+    document.getElementById('langSelect').addEventListener('change', (e) => {
+      LANG = e.target.value;
+      localStorage.setItem('apidogwatch.lang', LANG);
+      const url = new URL(window.location.href);
+      url.searchParams.set('lang', LANG);
+      window.history.replaceState({}, '', url);
+      applyI18n();
+      refreshAll();
+    });
 
     document.getElementById('refreshBtn').addEventListener('click', refreshAll);
     document.getElementById('clearBtn').addEventListener('click', async () => {
@@ -378,6 +542,7 @@
       if (e.key === 'Escape') closeDrawer();
     });
 
+    applyI18n();
     refreshAll();
     setInterval(refreshAll, 5000);
   </script>

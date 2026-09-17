@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,11 +30,14 @@ public class ApiDogWatchDashboardController {
     }
 
     @GetMapping({"", "/", "/ui", "/ui/"})
-    public ResponseEntity<String> ui() {
+    public ResponseEntity<String> ui(
+            @RequestParam(required = false) String lang,
+            @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage) {
+        String preferred = (lang != null && !lang.isBlank()) ? lang : acceptLanguage;
         return ResponseEntity.ok()
                 .header(HttpHeaders.CACHE_CONTROL, "no-store")
                 .contentType(MediaType.TEXT_HTML)
-                .body(DashboardAssets.loadHtml());
+                .body(DashboardAssets.loadHtml(preferred));
     }
 
     @GetMapping(value = "/api/metrics", produces = MediaType.APPLICATION_JSON_VALUE)
