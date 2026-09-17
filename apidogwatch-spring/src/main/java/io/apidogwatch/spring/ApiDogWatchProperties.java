@@ -15,9 +15,10 @@ public class ApiDogWatchProperties {
     private boolean enabled = true;
 
     /**
-     * OpenAPI location: {@code classpath:…}, filesystem path or HTTP(S) URL.
+     * OpenAPI location: {@code classpath:…}, filesystem path, HTTP(S) URL, or {@code auto}
+     * (probe classpath then springdoc {@code /v3/api-docs}).
      */
-    private String openapi = "classpath:openapi.json";
+    private String openapi = "auto";
 
     /**
      * Base path for UI and JSON API (default {@code /apidogwatch}).

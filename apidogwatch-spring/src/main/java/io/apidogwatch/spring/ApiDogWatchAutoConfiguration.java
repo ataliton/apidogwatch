@@ -1,5 +1,6 @@
 package io.apidogwatch.spring;
 
+import io.apidogwatch.ApiDogWatchConfig;
 import io.apidogwatch.ApiDogWatchEngine;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -8,6 +9,8 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
+import org.springframework.core.env.Environment;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -18,8 +21,18 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class ApiDogWatchAutoConfiguration {
 
     @Bean
-    public ApiDogWatchEngine apiDogWatchEngine(ApiDogWatchProperties properties) {
-        return ApiDogWatchEngine.create(properties.getOpenapi(), properties.toConfig());
+    public ApiDogWatchEngine apiDogWatchEngine(ApiDogWatchProperties properties,
+                                               ResourceLoader resourceLoader,
+                                               Environment environment) {
+        String openApiLocation = OpenApiLocationResolver.resolve(properties, resourceLoader, environment);
+        ApiDogWatchConfig config = ApiDogWatchConfig.builder()
+                .enabled(properties.isEnabled())
+                .openApiLocation(openApiLocation)
+                .uiPathPrefix(properties.getPath())
+                .maxBodyChars(properties.getMaxBodyChars())
+                .excludedPathPrefixes(properties.getExcludePaths())
+                .build();
+        return ApiDogWatchEngine.create(openApiLocation, config);
     }
 
     @Bean

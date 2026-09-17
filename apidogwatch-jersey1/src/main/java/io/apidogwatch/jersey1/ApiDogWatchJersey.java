@@ -3,36 +3,62 @@ package io.apidogwatch.jersey1;
 import io.apidogwatch.ApiDogWatchConfig;
 import io.apidogwatch.ApiDogWatchEngine;
 
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
  * One-stop bootstrap for Jersey 1 / JAX-RS 1.1 applications.
  *
+ * <h2>Zero-friction setup</h2>
  * <pre>{@code
- * // once at startup (or lazily on first request)
- * ApiDogWatchJersey.configure(cfg -> cfg
- *     .openApiLocation("classpath:openapi.json")   // or http://host/v3/api-docs
- *     .uiPathPrefix("/apidogwatch"));
+ * static {
+ *     ApiDogWatchJersey.auto(cfg -> cfg
+ *         .openApiLocation("classpath:openapi.json") // or http://host/v3/api-docs
+ *         .uiPathPrefix("/apidogwatch"));
+ * }
  *
- * // on each resource you want to watch:
- * {@literal @}ResourceFilters(ApiDogWatchResourceFilter.class)
- * public class MyResource { ... }
+ * {@literal @}Override
+ * public Set<Class<?>> getServices() {
+ *     Set<Class<?>> classes = new HashSet<>();
+ *     // ... your resources
+ *     classes.addAll(ApiDogWatchJersey.resources()); // dashboard UI
+ *     return classes;
+ * }
  *
- * // register dashboard (subclass only to set {@literal @}Path):
- * {@literal @}Path("/apidogwatch")
- * public class MyWatchUi extends ApiDogWatchDashboardResource {}
+ * {@literal @}Override
+ * public Set<Object> getSingletons() {
+ *     return ApiDogWatchJersey.singletons(); // watches ALL APIs
+ * }
  * }</pre>
  *
  * Enable with {@code -Dapidogwatch.enabled=true} or {@code APIDOGWATCH_ENABLED=true}.
+ * Dashboard: {@code /apidogwatch/ui} (or subclass {@link ApiDogWatchDashboardEndpoints} with a custom {@code @Path}).
  */
 public final class ApiDogWatchJersey {
 
     private static final Object LOCK = new Object();
     private static volatile ApiDogWatchEngine engine;
     private static volatile ApiDogWatchConfig config = ApiDogWatchConfig.builder().enabled(false).build();
+    private static final ApiDogWatchResourceFilterFactory GLOBAL_FILTER_FACTORY = new ApiDogWatchResourceFilterFactory();
 
     private ApiDogWatchJersey() {
+    }
+
+    /**
+     * Preferred entrypoint: configure + ready for {@link #resources()} / {@link #singletons()}.
+     */
+    public static void auto(Consumer<ApiDogWatchConfig.Builder> customizer) {
+        configure(customizer);
+    }
+
+    /**
+     * Configure from system properties only, then use {@link #resources()} / {@link #singletons()}.
+     */
+    public static void auto() {
+        configureFromSystem();
     }
 
     /**
@@ -64,6 +90,24 @@ public final class ApiDogWatchJersey {
         configure(builder -> {
             // defaults already applied in configure()
         });
+    }
+
+    /**
+     * JAX-RS resource classes to register (dashboard UI).
+     */
+    public static Set<Class<?>> resources() {
+        Set<Class<?>> classes = new LinkedHashSet<>();
+        classes.add(ApiDogWatchDashboardEndpoints.class);
+        return Collections.unmodifiableSet(classes);
+    }
+
+    /**
+     * JAX-RS singleton providers to register (global resource filter factory).
+     */
+    public static Set<Object> singletons() {
+        Set<Object> singletons = new LinkedHashSet<>();
+        singletons.add(GLOBAL_FILTER_FACTORY);
+        return Collections.unmodifiableSet(singletons);
     }
 
     public static boolean isEnabled() {

@@ -71,7 +71,8 @@ ApiDogWatch closes that gap by validating **what the API actually returns** whil
 | `apidogwatch-core` | Inspection engine, OpenAPI loader, schema comparator, dashboard assets |
 | `apidogwatch-spring` | Spring Boot starter (filter + interceptor + UI controller) |
 | `apidogwatch-servlet` | Jakarta Servlet filter + embedded dashboard server |
-| `apidogwatch-jersey1` | Jersey 1 `ResourceFilter` + dashboard resource (drop-in for JAX-RS 1.1) |
+| `apidogwatch-jersey1` | Jersey 1 adapter (`ResourceFilterFactory` global + dashboard) |
+| `apidogwatch-jersey1-shaded` | Fat jar (core + Jackson + slf4j) for thin EE/plugin classloaders |
 
 ---
 
@@ -101,7 +102,7 @@ repositories {
 
 ### 2. Add the dependency
 
-Use the GitHub user [`ataliton`](https://github.com/ataliton) and release tag `v1.0.2`.
+Use the GitHub user [`ataliton`](https://github.com/ataliton) and release tag `v1.0.5`.
 
 #### Spring Boot
 
@@ -111,14 +112,14 @@ Use the GitHub user [`ataliton`](https://github.com/ataliton) and release tag `v
 <dependency>
   <groupId>com.github.ataliton.apidogwatch</groupId>
   <artifactId>apidogwatch-spring</artifactId>
-  <version>v1.0.2</version>
+  <version>v1.0.5</version>
 </dependency>
 ```
 
 **Gradle**
 
 ```kotlin
-implementation("com.github.ataliton.apidogwatch:apidogwatch-spring:v1.0.2")
+implementation("com.github.ataliton.apidogwatch:apidogwatch-spring:v1.0.5")
 ```
 
 #### Java Servlet / Jakarta EE
@@ -129,32 +130,44 @@ implementation("com.github.ataliton.apidogwatch:apidogwatch-spring:v1.0.2")
 <dependency>
   <groupId>com.github.ataliton.apidogwatch</groupId>
   <artifactId>apidogwatch-servlet</artifactId>
-  <version>v1.0.2</version>
+  <version>v1.0.5</version>
 </dependency>
 ```
 
 **Gradle**
 
 ```kotlin
-implementation("com.github.ataliton.apidogwatch:apidogwatch-servlet:v1.0.2")
+implementation("com.github.ataliton.apidogwatch:apidogwatch-servlet:v1.0.5")
 ```
 
 #### Jersey 1 / JAX-RS 1.1 (legacy EE / ERP)
+
+Prefer the **shaded** artifact on thin plugin classloaders (Liberty / Systêxtil):
 
 **Maven**
 
 ```xml
 <dependency>
   <groupId>com.github.ataliton.apidogwatch</groupId>
-  <artifactId>apidogwatch-jersey1</artifactId>
-  <version>v1.0.2</version>
+  <artifactId>apidogwatch-jersey1-shaded</artifactId>
+  <version>v1.0.5</version>
 </dependency>
 ```
 
 **Gradle**
 
 ```kotlin
-implementation("com.github.ataliton.apidogwatch:apidogwatch-jersey1:v1.0.2")
+implementation("com.github.ataliton.apidogwatch:apidogwatch-jersey1-shaded:v1.0.5")
+```
+
+Thin dependency (host already provides Jackson):
+
+```xml
+<dependency>
+  <groupId>com.github.ataliton.apidogwatch</groupId>
+  <artifactId>apidogwatch-jersey1</artifactId>
+  <version>v1.0.5</version>
+</dependency>
 ```
 
 > Local development without JitPack:
@@ -169,14 +182,14 @@ implementation("com.github.ataliton.apidogwatch:apidogwatch-jersey1:v1.0.2")
 
 ## Quick start — Spring Boot
 
-1. Place your OpenAPI file on the classpath, e.g. `src/main/resources/openapi.json`
-2. Add `apidogwatch-spring`
+1. Add `apidogwatch-spring`
+2. Optional: put `openapi.json` / `openapi.yaml` on the classpath — or leave `apidogwatch.openapi=auto` (default) to probe classpath then springdoc `/v3/api-docs`
 3. Configure (optional):
 
 ```yaml
 apidogwatch:
   enabled: true
-  openapi: classpath:openapi.json
+  openapi: auto   # or classpath:openapi.json / http://host/v3/api-docs
   path: /apidogwatch
   max-body-chars: 64000
   exclude-paths:
@@ -248,19 +261,53 @@ ApiDogWatchDashboardServer.start(engine, 9099);
 
 ## Quick start — Jersey 1 / JAX-RS 1.1
 
-Designed for legacy EE / ERP plugins (same stack as Jersey `ResourceFilter`).
+Designed for legacy EE / ERP plugins (Jersey 1.19 / JAX-RS 1.1).
 
-1. Add `apidogwatch-jersey1`
-2. Bootstrap once (OpenAPI can be a file **or** your existing Swagger URL):
+### Zero-friction (recommended)
 
 ```java
-ApiDogWatchJersey.configure(cfg -> cfg
-        .openApiLocation("classpath:openapi.json")
-        // .openApiLocation("http://localhost:8080/v3/api-docs")
-        .uiPathPrefix("/apidogwatch"));
+static {
+    ApiDogWatchJersey.auto(cfg -> cfg
+            .openApiLocation("classpath:openapi.json") // or http://host/v3/api-docs
+            .uiPathPrefix("/apidogwatch"));
+}
+
+@Override
+public Set<Class<?>> getServices() {
+    Set<Class<?>> classes = new HashSet<>();
+    // ... your resources
+    classes.addAll(ApiDogWatchJersey.resources()); // dashboard at /apidogwatch/ui
+    return classes;
+}
+
+@Override
+public Set<Object> getSingletons() {
+    return ApiDogWatchJersey.singletons(); // watches ALL APIs
+}
 ```
 
-3. Annotate resources to watch:
+Enable:
+
+```bash
+-Dapidogwatch.enabled=true
+```
+
+Open `/apidogwatch/ui`. Locale follows the signed-in principal reflectively (`idioma` / `getIdioma()`), then `Accept-Language`.
+
+For a plugin base path (e.g. Systêxtil), subclass only to set `@Path`:
+
+```java
+@Path("/recebimento/apidogwatch")
+public class ApiDogWatchUi extends ApiDogWatchDashboardEndpoints {}
+```
+
+### Thin EE classloaders
+
+Use `apidogwatch-jersey1-shaded` and unpack/shade it into the plugin JAR (Jackson + slf4j are bundled; Jersey APIs stay `provided` by the host).
+
+### Optional: per-resource annotation
+
+Still supported if you prefer opt-in watching:
 
 ```java
 @Path("/orders")
@@ -268,23 +315,7 @@ ApiDogWatchJersey.configure(cfg -> cfg
 public class OrdersResource { ... }
 ```
 
-4. Register a tiny UI subclass (only `@Path` changes):
-
-```java
-@Path("/apidogwatch")
-public class ApiDogWatchUi extends ApiDogWatchDashboardResource {}
-```
-
-5. Start the JVM with:
-
-```bash
--Dapidogwatch.enabled=true
-```
-
-Open `/apidogwatch/ui`.
-
 ---
-
 ## Dashboard
 
 Open:
