@@ -42,6 +42,7 @@
         <module>apidogwatch-core</module>
         <module>apidogwatch-spring</module>
         <module>apidogwatch-servlet</module>
+        <module>apidogwatch-jersey1</module>
     </modules>
 
     <properties>
@@ -72,6 +73,11 @@
             <dependency>
                 <groupId>io.apidogwatch</groupId>
                 <artifactId>apidogwatch-servlet</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.apidogwatch</groupId>
+                <artifactId>apidogwatch-jersey1</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
