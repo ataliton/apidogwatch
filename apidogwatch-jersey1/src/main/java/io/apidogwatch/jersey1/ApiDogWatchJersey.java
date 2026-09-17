@@ -81,16 +81,22 @@ public final class ApiDogWatchJersey {
         }
         synchronized (LOCK) {
             if (engine == null) {
-                ApiDogWatchConfig effective = ApiDogWatchConfig.builder()
-                        .enabled(isEnabled())
-                        .openApiLocation(config.getOpenApiLocation())
-                        .uiPathPrefix(config.getUiPathPrefix())
-                        .maxBodyChars(config.getMaxBodyChars())
-                        .maxStoreEntries(config.getMaxStoreEntries())
-                        .excludedPathPrefixes(config.getExcludedPathPrefixes())
-                        .addExcludedPathPrefix(config.getUiPathPrefix())
-                        .build();
-                engine = ApiDogWatchEngine.create(effective.getOpenApiLocation(), effective);
+                try {
+                    ApiDogWatchConfig effective = ApiDogWatchConfig.builder()
+                            .enabled(isEnabled())
+                            .openApiLocation(config.getOpenApiLocation())
+                            .uiPathPrefix(config.getUiPathPrefix())
+                            .maxBodyChars(config.getMaxBodyChars())
+                            .maxStoreEntries(config.getMaxStoreEntries())
+                            .excludedPathPrefixes(config.getExcludedPathPrefixes())
+                            .addExcludedPathPrefix(config.getUiPathPrefix())
+                            .build();
+                    engine = ApiDogWatchEngine.create(effective.getOpenApiLocation(), effective);
+                } catch (Throwable t) {
+                    System.err.println("[ApiDogWatch] engine bootstrap failed: " + t);
+                    config = ApiDogWatchConfig.builder().enabled(false).build();
+                    throw new IllegalStateException("ApiDogWatch engine unavailable", t);
+                }
             }
             return engine;
         }

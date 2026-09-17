@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.apidogwatch.util.JsonSupport;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,6 +16,8 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Loads an OpenAPI 3.x document (JSON or YAML) from classpath, filesystem or HTTP URL
@@ -25,7 +25,7 @@ import java.util.Optional;
  */
 public final class OpenApiContract {
 
-    private static final Logger log = LoggerFactory.getLogger(OpenApiContract.class);
+    private static final Logger log = Logger.getLogger(OpenApiContract.class.getName());
 
     private final JsonNode root;
     private final boolean loaded;
@@ -41,16 +41,16 @@ public final class OpenApiContract {
 
     public static OpenApiContract load(String location) {
         if (location == null || location.isBlank()) {
-            log.warn("ApiDogWatch: no OpenAPI location configured");
+            log.warning("ApiDogWatch: no OpenAPI location configured");
             return empty();
         }
         try {
             String content = readLocation(location.trim());
             JsonNode node = parseDocument(content);
-            log.info("ApiDogWatch: OpenAPI contract loaded from {}", location);
+            log.info("ApiDogWatch: OpenAPI contract loaded from " + location);
             return new OpenApiContract(node, true);
         } catch (Exception ex) {
-            log.error("ApiDogWatch: failed to load OpenAPI from {}: {}", location, ex.getMessage());
+            log.log(Level.SEVERE, "ApiDogWatch: failed to load OpenAPI from " + location + ": " + ex.getMessage(), ex);
             return empty();
         }
     }

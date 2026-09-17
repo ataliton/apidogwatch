@@ -61,7 +61,7 @@ public class ApiDogWatchResourceFilter
                     null,
                     body
             ));
-        } catch (Exception ignored) {
+        } catch (Throwable ignored) {
             // Never break the business API because of the watchdog
         }
         return response;
