@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ApiDogWatch</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"IBM Plex Sans"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            mono: ['"IBM Plex Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace']
+          },
+          colors: {
+            ink: {
+              50: '#f4f7f7',
+              100: '#e4ecec',
+              200: '#c9d7d7',
+              300: '#9fb6b6',
+              400: '#6f8f8f',
+              500: '#517373',
+              600: '#3f5b5b',
+              700: '#354b4b',
+              800: '#2e3f3f',
+              900: '#293636',
+              950: '#141c1c'
+            },
+            signal: {
+              DEFAULT: '#0f9f6e',
+              soft: '#d9f5ea',
+              warn: '#d97706',
+              danger: '#e11d48'
+            }
+          },
+          boxShadow: {
+            panel: '0 24px 60px -28px rgba(20, 28, 28, 0.45)'
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    html, body { height: 100%; }
+    body {
+      background:
+        radial-gradient(1200px 600px at 10% -10%, rgba(15, 159, 110, 0.12), transparent 55%),
+        radial-gradient(900px 500px at 100% 0%, rgba(41, 54, 54, 0.08), transparent 50%),
+        linear-gradient(180deg, #f7faf9 0%, #eef3f2 100%);
+    }
+    .drawer {
+      transform: translateX(100%);
+      transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .drawer.open { transform: translateX(0); }
+    .backdrop {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 220ms ease;
+    }
+    .backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .mono-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+    .mono-scroll::-webkit-scrollbar-thumb {
+      background: #9fb6b6;
+      border-radius: 999px;
+    }
+    .pulse-dot {
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(0.85); }
+    }
+    .fade-in {
+      animation: fadeIn 320ms ease both;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="font-sans text-ink-900 antialiased">
+  <div class="min-h-full">
+    <header class="border-b border-ink-200/80 bg-white/70 backdrop-blur-md sticky top-0 z-20">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="h-9 w-9 rounded-xl bg-ink-950 text-white grid place-items-center shadow-panel">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 3c-2.2 2.4-3.5 4.7-3.5 7a3.5 3.5 0 1 0 7 0c0-2.3-1.3-4.6-3.5-7Z" stroke="currentColor" stroke-width="1.8"/>
+              <path d="M7 20c1.2-2.2 2.9-3.3 5-3.3S15.8 17.8 17 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-lg font-semibold tracking-tight">ApiDogWatch</h1>
+              <span class="inline-flex items-center gap-1 rounded-full bg-signal-soft px-2 py-0.5 text-[11px] font-medium text-signal">
+                <span class="h-1.5 w-1.5 rounded-full bg-signal pulse-dot"></span>
+                live
+              </span>
+            </div>
+            <p class="text-xs text-ink-500">Runtime contract guard for OpenAPI / Swagger</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="refreshBtn" class="rounded-lg border border-ink-200 bg-white px-3 py-2 text-sm font-medium text-ink-700 hover:bg-ink-50 transition">
+            Refresh
+          </button>
+          <button id="clearBtn" class="rounded-lg bg-ink-950 px-3 py-2 text-sm font-medium text-white hover:bg-ink-800 transition">
+            Clear history
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 fade-in">
+        <article class="rounded-2xl border border-ink-200 bg-white p-5 shadow-sm">
+          <p class="text-xs uppercase tracking-[0.14em] text-ink-400">Requests</p>
+          <p id="metricTotal" class="mt-3 text-3xl font-semibold tabular-nums">0</p>
+          <p class="mt-1 text-sm text-ink-500">Captured in memory</p>
+        </article>
+        <article class="rounded-2xl border border-ink-200 bg-white p-5 shadow-sm">
+          <p class="text-xs uppercase tracking-[0.14em] text-ink-400">Alerts</p>
+          <p id="metricAlerts" class="mt-3 text-3xl font-semibold tabular-nums text-signal-danger">0</p>
+          <p class="mt-1 text-sm text-ink-500">Contract divergences</p>
+        </article>
+        <article class="rounded-2xl border border-ink-200 bg-white p-5 shadow-sm">
+          <p class="text-xs uppercase tracking-[0.14em] text-ink-400">Clean</p>
+          <p id="metricClean" class="mt-3 text-3xl font-semibold tabular-nums text-signal">0</p>
+          <p class="mt-1 text-sm text-ink-500">Matched without issues</p>
+        </article>
+        <article class="rounded-2xl border border-ink-200 bg-white p-5 shadow-sm">
+          <p class="text-xs uppercase tracking-[0.14em] text-ink-400">Undocumented</p>
+          <p id="metricUndoc" class="mt-3 text-3xl font-semibold tabular-nums text-signal-warn">0</p>
+          <p class="mt-1 text-sm text-ink-500">Routes missing in OpenAPI</p>
+        </article>
+      </section>
+
+      <section class="rounded-2xl border border-ink-200 bg-white shadow-sm overflow-hidden fade-in">
+        <div class="border-b border-ink-100 px-5 py-4 flex flex-col lg:flex-row lg:items-center gap-3 justify-between">
+          <div>
+            <h2 class="text-base font-semibold">Inspected traffic</h2>
+            <p class="text-sm text-ink-500">Filter by method, path or alert status</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <select id="filterMethod" class="rounded-lg border border-ink-200 bg-white px-3 py-2 text-sm">
+              <option value="">All methods</option>
+              <option>GET</option>
+              <option>POST</option>
+              <option>PUT</option>
+              <option>PATCH</option>
+              <option>DELETE</option>
+            </select>
+            <input id="filterPath" type="search" placeholder="Filter path…"
+                   class="rounded-lg border border-ink-200 px-3 py-2 text-sm w-44 sm:w-56 focus:outline-none focus:ring-2 focus:ring-signal/30" />
+            <select id="filterStatus" class="rounded-lg border border-ink-200 bg-white px-3 py-2 text-sm">
+              <option value="">All status</option>
+              <option value="200">200</option>
+              <option value="201">201</option>
+              <option value="400">400</option>
+              <option value="401">401</option>
+              <option value="404">404</option>
+              <option value="500">500</option>
+            </select>
+            <label class="inline-flex items-center gap-2 rounded-lg border border-ink-200 px-3 py-2 text-sm cursor-pointer select-none">
+              <input id="filterAlerts" type="checkbox" class="rounded border-ink-300 text-signal focus:ring-signal" />
+              Alerts only
+            </label>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <thead class="bg-ink-50/80 text-left text-ink-500">
+              <tr>
+                <th class="px-5 py-3 font-medium">Time</th>
+                <th class="px-5 py-3 font-medium">Method</th>
+                <th class="px-5 py-3 font-medium">Route</th>
+                <th class="px-5 py-3 font-medium">Status</th>
+                <th class="px-5 py-3 font-medium">Latency</th>
+                <th class="px-5 py-3 font-medium">Alerts</th>
+              </tr>
+            </thead>
+            <tbody id="requestsBody" class="divide-y divide-ink-100"></tbody>
+          </table>
+          <div id="emptyState" class="hidden px-5 py-16 text-center">
+            <p class="text-ink-900 font-medium">No traffic inspected yet</p>
+            <p class="mt-1 text-sm text-ink-500">Call your API endpoints and refresh — ApiDogWatch will compare live payloads to the contract.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="backdrop" class="backdrop fixed inset-0 z-30 bg-ink-950/40"></div>
+  <aside id="drawer" class="drawer fixed inset-y-0 right-0 z-40 w-full max-w-3xl bg-white shadow-panel border-l border-ink-200 flex flex-col">
+    <div class="px-5 py-4 border-b border-ink-100 flex items-start justify-between gap-3">
+      <div>
+        <p class="text-xs uppercase tracking-[0.14em] text-ink-400">Inspection detail</p>
+        <h3 id="drawerTitle" class="mt-1 text-lg font-semibold">—</h3>
+        <p id="drawerMeta" class="mt-1 text-sm text-ink-500"></p>
+      </div>
+      <button id="closeDrawer" class="rounded-lg border border-ink-200 px-3 py-2 text-sm hover:bg-ink-50">Close</button>
+    </div>
+    <div id="divergenceList" class="px-5 py-4 border-b border-ink-100 space-y-2 max-h-40 overflow-y-auto mono-scroll"></div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-0 flex-1 min-h-0">
+      <div class="border-b lg:border-b-0 lg:border-r border-ink-100 flex flex-col min-h-0">
+        <div class="px-5 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-ink-400">Real payload</div>
+        <pre id="realPayload" class="mono-scroll flex-1 overflow-auto px-5 pb-5 text-[12px] leading-5 font-mono text-ink-800 whitespace-pre-wrap"></pre>
+      </div>
+      <div class="flex flex-col min-h-0">
+        <div class="px-5 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-ink-400">Swagger / OpenAPI schema</div>
+        <pre id="expectedSchema" class="mono-scroll flex-1 overflow-auto px-5 pb-5 text-[12px] leading-5 font-mono text-ink-800 whitespace-pre-wrap"></pre>
+      </div>
+    </div>
+  </aside>
+
+  <script>
+    const API_BASE = (() => {
+      const path = window.location.pathname.replace(/\/+$/, '');
+      if (path.endsWith('/ui')) return path.slice(0, -3) || '/apidogwatch';
+      return path || '/apidogwatch';
+    })();
+
+    const els = {
+      metricTotal: document.getElementById('metricTotal'),
+      metricAlerts: document.getElementById('metricAlerts'),
+      metricClean: document.getElementById('metricClean'),
+      metricUndoc: document.getElementById('metricUndoc'),
+      requestsBody: document.getElementById('requestsBody'),
+      emptyState: document.getElementById('emptyState'),
+      filterMethod: document.getElementById('filterMethod'),
+      filterPath: document.getElementById('filterPath'),
+      filterStatus: document.getElementById('filterStatus'),
+      filterAlerts: document.getElementById('filterAlerts'),
+      drawer: document.getElementById('drawer'),
+      backdrop: document.getElementById('backdrop'),
+      drawerTitle: document.getElementById('drawerTitle'),
+      drawerMeta: document.getElementById('drawerMeta'),
+      divergenceList: document.getElementById('divergenceList'),
+      realPayload: document.getElementById('realPayload'),
+      expectedSchema: document.getElementById('expectedSchema')
+    };
+
+    function methodBadge(method) {
+      const tones = {
+        GET: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+        POST: 'bg-sky-50 text-sky-700 border-sky-200',
+        PUT: 'bg-amber-50 text-amber-700 border-amber-200',
+        PATCH: 'bg-violet-50 text-violet-700 border-violet-200',
+        DELETE: 'bg-rose-50 text-rose-700 border-rose-200'
+      };
+      const tone = tones[method] || 'bg-ink-50 text-ink-700 border-ink-200';
+      return `<span class="inline-flex rounded-md border px-2 py-0.5 text-xs font-semibold ${tone}">${method}</span>`;
+    }
+
+    function statusTone(status) {
+      if (status >= 500) return 'text-rose-600';
+      if (status >= 400) return 'text-amber-600';
+      return 'text-emerald-600';
+    }
+
+    function formatTime(iso) {
+      try {
+        return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      } catch {
+        return iso;
+      }
+    }
+
+    async function fetchJson(url, options) {
+      const res = await fetch(url, options);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    }
+
+    async function loadMetrics() {
+      const data = await fetchJson(`${API_BASE}/api/metrics`);
+      els.metricTotal.textContent = data.totalRequests ?? 0;
+      els.metricAlerts.textContent = data.alertCount ?? 0;
+      els.metricClean.textContent = data.cleanCount ?? 0;
+      els.metricUndoc.textContent = data.undocumentedRoutes ?? 0;
+    }
+
+    async function loadRequests() {
+      const params = new URLSearchParams();
+      if (els.filterMethod.value) params.set('method', els.filterMethod.value);
+      if (els.filterPath.value.trim()) params.set('path', els.filterPath.value.trim());
+      if (els.filterStatus.value) params.set('status', els.filterStatus.value);
+      if (els.filterAlerts.checked) params.set('alertsOnly', 'true');
+
+      const data = await fetchJson(`${API_BASE}/api/requests?${params}`);
+      const items = data.items || [];
+      els.requestsBody.innerHTML = '';
+      els.emptyState.classList.toggle('hidden', items.length > 0);
+
+      for (const item of items) {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-ink-50/70 cursor-pointer transition';
+        tr.innerHTML = `
+          <td class="px-5 py-3 text-ink-500 whitespace-nowrap">${formatTime(item.timestamp)}</td>
+          <td class="px-5 py-3">${methodBadge(item.method)}</td>
+          <td class="px-5 py-3 font-mono text-[12px]">${escapeHtml(item.path)}</td>
+          <td class="px-5 py-3 font-medium ${statusTone(item.statusCode)}">${item.statusCode}</td>
+          <td class="px-5 py-3 text-ink-500">${item.durationMs} ms</td>
+          <td class="px-5 py-3">
+            ${item.hasAlerts
+              ? `<span class="inline-flex rounded-full bg-rose-50 text-rose-700 px-2 py-0.5 text-xs font-medium">${item.alertCount} alert(s)</span>`
+              : `<span class="inline-flex rounded-full bg-emerald-50 text-emerald-700 px-2 py-0.5 text-xs font-medium">clean</span>`}
+          </td>`;
+        tr.addEventListener('click', () => openDetail(item.id));
+        els.requestsBody.appendChild(tr);
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;');
+    }
+
+    async function openDetail(id) {
+      const data = await fetchJson(`${API_BASE}/api/requests/${id}`);
+      els.drawerTitle.textContent = `${data.method} ${data.path}`;
+      els.drawerMeta.textContent = `Status ${data.statusCode} · ${data.durationMs} ms · ${formatTime(data.timestamp)}`;
+
+      const divergences = data.divergences || [];
+      if (!divergences.length) {
+        els.divergenceList.innerHTML = `<div class="rounded-xl bg-emerald-50 text-emerald-800 px-3 py-2 text-sm">No divergences — payload matches the contract.</div>`;
+      } else {
+        els.divergenceList.innerHTML = divergences.map(d => `
+          <div class="rounded-xl border border-rose-200 bg-rose-50/70 px-3 py-2">
+            <div class="text-xs font-semibold text-rose-700">${escapeHtml(d.type)}</div>
+            <div class="text-sm text-ink-800 mt-0.5">${escapeHtml(d.message)}</div>
+            <div class="text-xs font-mono text-ink-500 mt-1">${escapeHtml(d.path || '$')}</div>
+          </div>`).join('');
+      }
+
+      els.realPayload.textContent = data.responseBody || '—';
+      els.expectedSchema.textContent = data.expectedSchemaJson || 'No schema resolved for this response.';
+      els.drawer.classList.add('open');
+      els.backdrop.classList.add('open');
+    }
+
+    function closeDrawer() {
+      els.drawer.classList.remove('open');
+      els.backdrop.classList.remove('open');
+    }
+
+    async function refreshAll() {
+      await Promise.all([loadMetrics(), loadRequests()]);
+    }
+
+    document.getElementById('refreshBtn').addEventListener('click', refreshAll);
+    document.getElementById('clearBtn').addEventListener('click', async () => {
+      await fetch(`${API_BASE}/api/requests`, { method: 'DELETE' });
+      closeDrawer();
+      await refreshAll();
+    });
+    document.getElementById('closeDrawer').addEventListener('click', closeDrawer);
+    els.backdrop.addEventListener('click', closeDrawer);
+    [els.filterMethod, els.filterStatus, els.filterAlerts].forEach(el => el.addEventListener('change', loadRequests));
+    els.filterPath.addEventListener('input', () => {
+      clearTimeout(window.__adwFilterTimer);
+      window.__adwFilterTimer = setTimeout(loadRequests, 220);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeDrawer();
+    });
+
+    refreshAll();
+    setInterval(refreshAll, 5000);
+  </script>
+</body>
+</html>
