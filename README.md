@@ -102,7 +102,7 @@ repositories {
 
 ### 2. Add the dependency
 
-Use the GitHub user [`ataliton`](https://github.com/ataliton) and release tag `v1.0.5`.
+Use the GitHub user [`ataliton`](https://github.com/ataliton) and release tag `v1.0.6`.
 
 #### Spring Boot
 
@@ -112,14 +112,14 @@ Use the GitHub user [`ataliton`](https://github.com/ataliton) and release tag `v
 <dependency>
   <groupId>com.github.ataliton.apidogwatch</groupId>
   <artifactId>apidogwatch-spring</artifactId>
-  <version>v1.0.5</version>
+  <version>v1.0.6</version>
 </dependency>
 ```
 
 **Gradle**
 
 ```kotlin
-implementation("com.github.ataliton.apidogwatch:apidogwatch-spring:v1.0.5")
+implementation("com.github.ataliton.apidogwatch:apidogwatch-spring:v1.0.6")
 ```
 
 #### Java Servlet / Jakarta EE
@@ -130,14 +130,14 @@ implementation("com.github.ataliton.apidogwatch:apidogwatch-spring:v1.0.5")
 <dependency>
   <groupId>com.github.ataliton.apidogwatch</groupId>
   <artifactId>apidogwatch-servlet</artifactId>
-  <version>v1.0.5</version>
+  <version>v1.0.6</version>
 </dependency>
 ```
 
 **Gradle**
 
 ```kotlin
-implementation("com.github.ataliton.apidogwatch:apidogwatch-servlet:v1.0.5")
+implementation("com.github.ataliton.apidogwatch:apidogwatch-servlet:v1.0.6")
 ```
 
 #### Jersey 1 / JAX-RS 1.1 (legacy EE / ERP)
@@ -150,14 +150,14 @@ Prefer the **shaded** artifact on thin plugin classloaders (Liberty / Systêxtil
 <dependency>
   <groupId>com.github.ataliton.apidogwatch</groupId>
   <artifactId>apidogwatch-jersey1-shaded</artifactId>
-  <version>v1.0.5</version>
+  <version>v1.0.6</version>
 </dependency>
 ```
 
 **Gradle**
 
 ```kotlin
-implementation("com.github.ataliton.apidogwatch:apidogwatch-jersey1-shaded:v1.0.5")
+implementation("com.github.ataliton.apidogwatch:apidogwatch-jersey1-shaded:v1.0.6")
 ```
 
 Thin dependency (host already provides Jackson):
@@ -166,7 +166,7 @@ Thin dependency (host already provides Jackson):
 <dependency>
   <groupId>com.github.ataliton.apidogwatch</groupId>
   <artifactId>apidogwatch-jersey1</artifactId>
-  <version>v1.0.5</version>
+  <version>v1.0.6</version>
 </dependency>
 ```
 
